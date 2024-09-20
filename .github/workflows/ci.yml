@@ -1,39 +1,36 @@
-name: CI Workflow
-
+name: Build all
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-env:  # Variables de entorno
-  GREETING: "Hola, mundo desde GitHub Actions!"
-
+push:
+branches:
+- 'prod'
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Run a simple script
-        run: echo $GREETING  # Usar la variable de entorno
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Run tests
-        run: echo "Ejecutando pruebas..."
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Deploy application
-        run: echo "Desplegando la aplicación..."
+check_out:
+name: check out
+runs-on: [self-hosted, linux, x64, prod]
+steps:
+- uses: actions/checkout@v1
+copy_env:
+name: copy env
+needs: check_out
+runs-on: [self-hosted, linux, x64, prod]
+steps:
+- name: copy env
+run: cp /etc/envs/.env .
+docker_compose:
+name: docker compose
+needs: copy_env
+runs-on: [self-hosted, linux, x64, prod]
+steps:
+- name: stop old container
+run: docker stop $(docker ps -a -q)
+continue-on-error: true
+- name: remove old container
+run: docker rm $(docker ps -a -q)
+continue-on-error: true
+- name: remove old image
+run: docker rmi $(docker images -a -q)
+continue-on-error: true
+- name: clear all docker
+run: sudo docker system prune --all -f
+- name: Build the docker-compose
+run: docker compose -f "docker-compose.yml" up --build -d
