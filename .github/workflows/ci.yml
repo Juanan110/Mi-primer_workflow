@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:  # Variables de entorno
+  GREETING: "Hola, mundo desde GitHub Actions!"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run a simple script
-        run: echo "Hola, mundo desde GitHub Actions!"
+        run: echo $GREETING  # Usar la variable de entorno
 
   test:
     runs-on: ubuntu-latest
