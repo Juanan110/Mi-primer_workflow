@@ -23,3 +23,11 @@ jobs:
     steps:
       - name: Run tests
         run: echo "Ejecutando pruebas..."
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test  # Esto asegura que el trabajo 'deploy' se ejecute después de 'test'
+
+    steps:
+      - name: Deploy application
+        run: echo "Desplegando la aplicación..."
