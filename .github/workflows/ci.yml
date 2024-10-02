@@ -1,36 +1,44 @@
 name: Build all
 on:
-push:
-branches:
-- 'prod'
+  push:
+    branches:
+      - 'prod'
+
 jobs:
-check_out:
-name: check out
-runs-on: [self-hosted, linux, x64, prod]
-steps:
-- uses: actions/checkout@v1
-copy_env:
-name: copy env
-needs: check_out
-runs-on: [self-hosted, linux, x64, prod]
-steps:
-- name: copy env
-run: cp /etc/envs/.env .
-docker_compose:
-name: docker compose
-needs: copy_env
-runs-on: [self-hosted, linux, x64, prod]
-steps:
-- name: stop old container
-run: docker stop $(docker ps -a -q)
-continue-on-error: true
-- name: remove old container
-run: docker rm $(docker ps -a -q)
-continue-on-error: true
-- name: remove old image
-run: docker rmi $(docker images -a -q)
-continue-on-error: true
-- name: clear all docker
-run: sudo docker system prune --all -f
-- name: Build the docker-compose
-run: docker compose -f "docker-compose.yml" up --build -d
+  check_out:
+    name: Check out
+    runs-on: [self-hosted, linux, x64, prod]
+    steps:
+      - uses: actions/checkout@v1
+
+  copy_env:
+    name: Copy env
+    needs: check_out
+    runs-on: [self-hosted, linux, x64, prod]
+    steps:
+      - name: Copy env
+        run: cp /etc/envs/.env .
+
+  docker_compose:
+    name: Docker Compose
+    needs: copy_env
+    runs-on: [self-hosted, linux, x64, prod]
+    steps:
+      - name: Stop old container
+        run: docker stop $(docker ps -a -q)
+        continue-on-error: true
+
+      - name: Remove old container
+        run: docker rm $(docker ps -a -q)
+        continue-on-error: true
+
+      - name: Remove old image
+        run: docker rmi $(docker images -a -q)
+        continue-on-error: true
+
+      - name: Clear all Docker
+        run: sudo docker system prune --all -f
+
+      - name: Build the docker-compose
+        run: docker compose -f "docker-compose.yml" up --build -d
+
